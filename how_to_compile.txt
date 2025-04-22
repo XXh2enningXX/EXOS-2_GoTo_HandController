@@ -1,0 +1,5 @@
+start --> "Debian" in WLS
+
+cd /mnt/e/Workfolder/GIT/EXOS-2_GoTo_HandController/exos-lite
+
+make
