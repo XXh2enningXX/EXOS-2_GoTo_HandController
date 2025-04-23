@@ -1,4 +1,3 @@
-
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
@@ -10,11 +9,11 @@
 
 #ifndef portTICK_RATE_MS
 #define portTICK_RATE_MS ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#endif
+
 #define portSTACK_GROWTH          (-1)
 #define portYIELD()               asm volatile ("NOP")
-
 #define portNOP()                 asm volatile ("NOP")
-
 #define portBYTE_ALIGNMENT        8
 #define portMAX_DELAY             ( ( TickType_t ) 0xffffffffUL )
 
