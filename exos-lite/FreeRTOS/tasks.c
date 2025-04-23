@@ -37,6 +37,7 @@
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 #include "task.h"
 #include "timers.h"
 #include "stack_macros.h"

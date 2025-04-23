@@ -7,10 +7,6 @@
 #define portENTER_CRITICAL() vPortEnterCritical()
 #define portEXIT_CRITICAL() vPortExitCritical()
 
-#ifndef portTICK_RATE_MS
-#define portTICK_RATE_MS ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#endif
-
 #define portSTACK_GROWTH          (-1)
 #define portYIELD()               asm volatile ("NOP")
 #define portNOP()                 asm volatile ("NOP")
@@ -21,5 +17,8 @@ void vPortEnterCritical(void);
 void vPortExitCritical(void);
 void vTickISR(void);
 void vPortISRStartFirstTask(void);
+
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION( vFunction, pvParameters )       void vFunction( void *pvParameters )
 
 #endif /* PORTMACRO_H */
