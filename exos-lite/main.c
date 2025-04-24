@@ -1,30 +1,11 @@
-
-#include <stddef.h>        // Für NULL
-#include "FreeRTOS.h"
-#include "task.h"
-#include "menu.h"
-#include "input.h"
-#include "motor.h"
-#include "lcd.h"
-
-void AppMainTask(void* pvParameters) {
-    InitLCD();
-    InitMotor();
-    InitInput();
-
-    LCD_Clear();
-    LCD_Print("EXOS Lite Ready");
-
-    for (;;) {
-        HandleInput();
-        HandleMenu();
-        vTaskDelay(pdMS_TO_TICKS(100)); // 100 ms Refresh
-    }
-}
+#include <LPC214x.h>
+#include "hardware.h" // ehemals file1f30.c
 
 int main(void) {
-    xTaskCreate(AppMainTask, "App", 512, NULL, 2, NULL);
-    vTaskStartScheduler();
+    lpc_hw_init();  // Initialisiert Clock, GPIOs, Display usw.
 
-    while (1); // Sollte nie erreicht werden
+    lcd_display_clear();                // Bildschirm löschen
+    lcd_display_write_string("Hallo!", 0, 0);  // Zeile 0, Spalte 0
+
+    while (1);  // Endlosschleife, System bleibt aktiv
 }
