@@ -1,0 +1,119 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "b80084f0-ca82-476f-8415-510db51a7565")
+	(paper "A4")
+	(lib_symbols)
+	(wire
+		(pts
+			(xy 67.31 26.67) (xy 81.28 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5386c504-86d2-4436-bdfe-d452234c67b1")
+	)
+	(sheet
+		(at 31.115 22.86)
+		(size 36.195 36.83)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "17a98bf6-2a59-4e19-9a76-76bb0ebbd0a8")
+		(property "Sheetname" "Power"
+			(at 31.115 22.1484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 31.115 60.2746 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "12V" output
+			(at 67.31 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "f0f9822b-008a-4321-b910-71af9954fbc5")
+		)
+		(instances
+			(project "SkyVision_V2_aufgeräumt"
+				(path "/b80084f0-ca82-476f-8415-510db51a7565"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 81.28 23.495)
+		(size 36.195 33.655)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "96f70905-b27c-41fc-b468-e5217bd9f476")
+		(property "Sheetname" "Connectors"
+			(at 81.28 22.7834 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "connectors.kicad_sch"
+			(at 81.28 57.7346 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "12V" input
+			(at 81.28 26.67 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "0c232e10-07bf-4e13-9851-c335a09b1aad")
+		)
+		(instances
+			(project "SkyVision_V2_aufgeräumt"
+				(path "/b80084f0-ca82-476f-8415-510db51a7565"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)
