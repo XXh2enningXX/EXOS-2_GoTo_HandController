@@ -1,7 +1,7 @@
 (kicad_sch
-	(version 20231120)
+	(version 20250114)
 	(generator "eeschema")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(uuid "b80084f0-ca82-476f-8415-510db51a7565")
 	(paper "A4")
 	(lib_symbols)
@@ -18,6 +18,10 @@
 	(sheet
 		(at 31.115 22.86)
 		(size 36.195 36.83)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1524)
@@ -47,13 +51,23 @@
 		)
 		(pin "12V" output
 			(at 67.31 26.67 0)
+			(uuid "f0f9822b-008a-4321-b910-71af9954fbc5")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
-			(uuid "f0f9822b-008a-4321-b910-71af9954fbc5")
+		)
+		(pin "5V" output
+			(at 67.31 34.29 0)
+			(uuid "4ef692af-d1b8-43ea-bb46-6573f2912767")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
 		)
 		(instances
 			(project "SkyVision_V2_aufgeräumt"
@@ -64,8 +78,54 @@
 		)
 	)
 	(sheet
+		(at 57.15 87.63)
+		(size 39.37 43.18)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "45035cb4-3c72-4857-b6a3-a39fa0342e18")
+		(property "Sheetname" "Motor"
+			(at 57.15 86.9184 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "motor.kicad_sch"
+			(at 57.15 131.3946 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "SkyVision_V2_aufgeräumt"
+				(path "/b80084f0-ca82-476f-8415-510db51a7565"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 81.28 23.495)
 		(size 36.195 33.655)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1524)
@@ -95,13 +155,13 @@
 		)
 		(pin "12V" input
 			(at 81.28 26.67 180)
+			(uuid "0c232e10-07bf-4e13-9851-c335a09b1aad")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "0c232e10-07bf-4e13-9851-c335a09b1aad")
 		)
 		(instances
 			(project "SkyVision_V2_aufgeräumt"
@@ -111,9 +171,52 @@
 			)
 		)
 	)
+	(sheet
+		(at 132.08 86.36)
+		(size 39.37 40.64)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "bb6a45e5-8296-4fda-965d-b12cd7e96e68")
+		(property "Sheetname" "MCU"
+			(at 132.08 85.6484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 132.08 127.5846 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "SkyVision_V2_aufgeräumt"
+				(path "/b80084f0-ca82-476f-8415-510db51a7565"
+					(page "5")
+				)
+			)
+		)
+	)
 	(sheet_instances
 		(path "/"
 			(page "1")
 		)
 	)
+	(embedded_fonts no)
 )
