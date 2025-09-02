@@ -409,6 +409,10 @@
     [
       "bb6a45e5-8296-4fda-965d-b12cd7e96e68",
       "MCU"
+    ],
+    [
+      "0ad1bdf4-f338-48bd-ac4a-f8a568b3f60d",
+      "Encoder"
     ]
   ],
   "text_variables": {}
