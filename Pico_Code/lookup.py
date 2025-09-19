@@ -1,46 +1,59 @@
 # lookup.py
-# Automatisch generierte Lookup-Tabelle (12-Byte-Frames) für HBX-Simulator
 
 def hx(s: str) -> bytes:
-    """Konvertiert Hex-String in Bytes"""
-    return bytes(int(b, 16) for b in s.split()) if s.strip() else b""
+    """Hilfsfunktion: Wandelt '55 AA 01 04 ...' in Bytes um"""
+    return bytes.fromhex(s)
 
-CMD_RA = {
-    "-512": hx("AA 06 FC 42 00 D6 80 EE D0 B8 F8 0A"),
-    "-256": hx("6A C2 D8 80 A0 80 5A 80 F0 AA 06 FC"),
-    "-128": hx("56 C2 D8 40 00 D2 5A FE 1A 80 AA 06"),
-    "-64":  hx("F4 C2 F8 F4 08 D8 1A 00 00 00 00 00"),
-    "-16":  hx("56 C2 D8 40 00 00 00 00 00 00 00 00"),
-    "-8":   hx("F4 C2 F8 F4 0C 00 00 00 00 00 00 00"),
-    "-2":   hx("F4 C2 F8 F4 08 00 00 00 00 00 00 00"),
-    "-1":   hx("D2 D8 46 80 00 00 00 00 00 00 00 00"),
-    "0":    hx("AA 00 F0 C2 00 00 00 00 00 00 00 00"),
-    "1":    hx("AE 02 F0 C2 00 00 00 00 00 00 00 00"),
-    "2":    hx("AE 04 F0 C2 00 00 00 00 00 00 00 00"),
-    "8":    hx("AE 10 F0 C2 00 00 00 00 00 00 00 00"),
-    "16":   hx("AE 20 F0 C2 00 00 00 00 00 00 00 00"),
-    "64":   hx("AE 80 F0 C2 00 00 00 00 00 00 00 00"),
-    "128":  hx("AE 00 F1 C2 00 00 00 00 00 00 00 00"),
-    "256":  hx("AE 00 F2 C2 00 00 00 00 00 00 00 00"),
-    "512":  hx("AE 00 F4 C2 00 00 00 00 00 00 00 00"),
+# -----------------------------------------------------------
+# Geschwindigkeitswerte für g_bMountType == 1
+# -----------------------------------------------------------
+SPEED_MAP = {
+    0:  "00 00",  # STOP
+    1:  "00 05",  # 1x
+    2:  "00 0A",  # 2x
+    3:  "00 28",  # 8x
+    4:  "00 A0",  # 16x
+    5:  "01 40",  # 64x
+    6:  "02 80",  # 128x
+    7:  "05 00",  # 256x
+    8:  "0A 00",  # 512x
+    9:  "0A 00",  # MAX (=512x)
 }
 
-CMD_DEC = {
-    "-512": hx("D2 D8 46 80 68 80 AA F4 C2 C2 AA 00"),
-    "-256": hx("AA 06 FC 42 00 56 80 68 D0 A8 0A FC"),
-    "-128": hx("6A C2 D8 80 A0 80 5A 80 F0 AA 06 FC"),
-    "-64":  hx("56 C2 D8 40 00 D2 5A FE 1A 80 00 00"),
-    "-16":  hx("F4 C2 F8 F4 08 D8 1A 00 00 00 00 00"),
-    "-8":   hx("56 C2 D8 40 00 00 00 00 00 00 00 00"),
-    "-2":   hx("F4 C2 F8 F4 0C 00 00 00 00 00 00 00"),
-    "-1":   hx("F4 C2 F8 F4 08 00 00 00 00 00 00 00"),
-    "0":    hx("AA 00 F0 C2 00 00 00 00 00 00 00 00"),
-    "1":    hx("AA 06 FC 42 00 00 00 00 00 00 00 00"),
-    "2":    hx("AA 08 FC 42 00 00 00 00 00 00 00 00"),
-    "8":    hx("AA 16 FC 42 00 00 00 00 00 00 00 00"),
-    "16":   hx("AA 26 FC 42 00 00 00 00 00 00 00 00"),
-    "64":   hx("AA 86 FC 42 00 00 00 00 00 00 00 00"),
-    "128":  hx("AA C2 F8 42 00 00 00 00 00 00 00 00"),
-    "256":  hx("AA 06 F8 42 00 00 00 00 00 00 00 00"),
-    "512":  hx("D2 D8 46 80 00 00 00 00 00 00 00 00"),
-}
+# -----------------------------------------------------------
+# Frame-Generator
+# -----------------------------------------------------------
+def make_frame(axis: str, speed: int) -> bytes:
+    """
+    axis: 'ra' oder 'dec'
+    speed: positives int = forward, negatives int = backward
+    Rückgabe: 8-Byte Frame
+    """
+    header = "55 AA 01 04"
+    if axis == "ra":
+        axis_code = "01"
+    elif axis == "dec":
+        axis_code = "21"
+    else:
+        raise ValueError("Ungültige Achse (nur 'ra' oder 'dec')")
+
+    if speed >= 0:
+        dir_code = "00"  # forward
+    else:
+        dir_code = "01"  # backward
+
+    speed_val = SPEED_MAP.get(abs(speed))
+    if not speed_val:
+        raise ValueError(f"Ungültige Geschwindigkeit: {speed}")
+
+    frame_str = f"{header} {axis_code} {dir_code} {speed_val}"
+    return hx(frame_str)
+
+# -----------------------------------------------------------
+# Lookup-Tabellen (z. B. CMD_RA["+1"], CMD_RA["-1"])
+# -----------------------------------------------------------
+CMD_RA = {str(s): make_frame("ra", s) for s in range(-9, 10) if s != 0}
+CMD_RA["0"] = make_frame("ra", 0)
+
+CMD_DEC = {str(s): make_frame("dec", s) for s in range(-9, 10) if s != 0}
+CMD_DEC["0"] = make_frame("dec", 0)
