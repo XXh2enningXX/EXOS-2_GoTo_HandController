@@ -1,58 +1,77 @@
-import sys, uselect
-import lookup  # deine Lookup-Tabelle
+# main.py – Steuerung für RA/DEC Motoren über HBX
+# Läuft auf Raspberry Pi Pico (MicroPython)
 
-# Poll-Objekt für non-blocking Konsoleneingaben
-poll = uselect.poll()
-poll.register(sys.stdin, uselect.POLLIN)
+import machine
+from lookup import CMD_RA, CMD_DEC  # aus deinem lookup.py
 
-def read_input_line():
-    res = poll.poll(0)  # 0 = non-blocking
-    if res:
-        line = sys.stdin.readline()
-        return line.strip()
-    return ""
+# UART1 initialisieren
+# Pins ggf. anpassen (GPIO4=TX, GPIO5=RX ist nur ein Beispiel)
+uart = machine.UART(1, baudrate=9600, tx=machine.Pin(8), rx=machine.Pin(9))
 
-def send_frame(frame):
-    # TODO: hier deine UART / I2C / GPIO Ausgabe einsetzen
-    print("Sende Frame:", frame)
+def send_frame(frame: bytes):
+    """Schickt ein einzelnes Frame über UART1."""
+    uart.write(frame)
 
-def handle_command(cmd):
-    parts = cmd.split()
-    if not parts:
-        return
-    if parts[0] == "ra":
-        if len(parts) > 1:
-            speed = parts[1]
-            frame = lookup.CMD_RA.get(speed)
-            if frame:
-                send_frame(frame)
-            else:
-                print("Unbekannte RA-Speed:", speed)
-    elif parts[0] == "dec":
-        if len(parts) > 1:
-            speed = parts[1]
-            frame = lookup.CMD_DEC.get(speed)
-            if frame:
-                send_frame(frame)
-            else:
-                print("Unbekannte DEC-Speed:", speed)
-    elif parts[0] == "q":
-        print("Beende HBX-Sim Pico")
-        raise SystemExit
+def set_speed(axis: str, speed: int):
+    """
+    Setzt die Geschwindigkeit für die angegebene Achse.
+    axis: 'ra' oder 'dec'
+    speed: -9 … +9
+    """
+    if axis.lower() == "ra":
+        table = CMD_RA
+    elif axis.lower() == "dec":
+        table = CMD_DEC
     else:
-        print("Unbekannter Befehl:", cmd)
+        print("Unbekannte Achse:", axis)
+        return
 
-def main():
-    print("HBX-Sim Pico läuft.")
-    print("Befehle über USB-Konsole:")
-    print("  ra <speed>   (z.B. ra 16, ra -64, ra 0)")
-    print("  dec <speed>  (z.B. dec 8, dec -128, dec 0)")
-    print("  q            (beenden)")
+    key = str(speed)
+    if key in table:
+        frame = table[key]
+        send_frame(frame)
+        print(f"Sende {axis.upper()} speed {speed}: {frame.hex(' ').upper()}")
+    else:
+        print(f"Keine Frame für {axis} speed {speed} definiert.")
+
+def stop_all():
+    """Stoppt beide Achsen."""
+    set_speed("ra", 0)
+    set_speed("dec", 0)
+
+def repl_loop():
+    """Einfache Eingabe über USB-Konsole."""
+    print("HBX-Sim Pico bereit.")
+    print("Befehle: ra <speed>, dec <speed>, stop")
+    
+    uart.write(b"Test123\r\n")
 
     while True:
-        cmd = read_input_line()
-        if cmd:
-            handle_command(cmd)
+        try:
+            cmd = input(">> ").strip().split()
+            if not cmd:
+                continue
 
+            if cmd[0] == "stop":
+                stop_all()
+            elif cmd[0] in ("ra", "dec") and len(cmd) == 2:
+                axis = cmd[0]
+                try:
+                    speed = int(cmd[1])
+                    set_speed(axis, speed)
+                except ValueError:
+                    print("Ungültige Geschwindigkeit:", cmd[1])
+            elif cmd[0] == "q":
+                stop_all()
+                print("Beendet mit q.")
+                break
+            else:
+                print("Unbekannter Befehl:", " ".join(cmd))
+        except KeyboardInterrupt:
+            stop_all()
+            print("Beendet.")
+            break
+
+# Hauptprogramm starten
 if __name__ == "__main__":
-    main()
+    repl_loop()
