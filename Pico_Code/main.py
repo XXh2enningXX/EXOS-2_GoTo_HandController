@@ -1,77 +1,70 @@
-# main.py – Steuerung für RA/DEC Motoren über HBX
-# Läuft auf Raspberry Pi Pico (MicroPython)
+# main.py
+from machine import UART, Pin
+import utime
+from lookup import CMD_RA, CMD_DEC
 
-import machine
-from lookup import CMD_RA, CMD_DEC  # aus deinem lookup.py
+# UART1: TX=Pin8, RX=Pin9
+uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
 
-# UART1 initialisieren
-# Pins ggf. anpassen (GPIO4=TX, GPIO5=RX ist nur ein Beispiel)
-uart = machine.UART(1, baudrate=9600, tx=machine.Pin(8), rx=machine.Pin(9))
+COUNTS_PER_ARCSEC = 2.55       # aus Kalibrierung (≈38.3 counts/s bei 15.04"/s)
+COUNTS_PER_DEG = COUNTS_PER_ARCSEC * 3600
 
 def send_frame(frame: bytes):
-    """Schickt ein einzelnes Frame über UART1."""
     uart.write(frame)
 
-def set_speed(axis: str, speed: int):
-    """
-    Setzt die Geschwindigkeit für die angegebene Achse.
-    axis: 'ra' oder 'dec'
-    speed: -9 … +9
-    """
-    if axis.lower() == "ra":
-        table = CMD_RA
-    elif axis.lower() == "dec":
-        table = CMD_DEC
-    else:
-        print("Unbekannte Achse:", axis)
-        return
+def read_response(timeout_ms=50):
+    start = utime.ticks_ms()
+    resp = b''
+    while utime.ticks_diff(utime.ticks_ms(), start) < timeout_ms:
+        if uart.any():
+            resp += uart.read()
+    return resp
 
-    key = str(speed)
-    if key in table:
-        frame = table[key]
-        send_frame(frame)
-        print(f"Sende {axis.upper()} speed {speed}: {frame.hex(' ').upper()}")
-    else:
-        print(f"Keine Frame für {axis} speed {speed} definiert.")
+def parse_position(resp: bytes):
+    """ Erwartet Antwort mit mindestens 4 Nutzbytes """
+    if len(resp) < 4:
+        return None
+    # Nimm die letzten 4 Bytes (Positionszähler, Big-Endian)
+    val = int.from_bytes(resp[-4:], "big")
+    # Umrechnen
+    deg = (val / COUNTS_PER_DEG) % 360
+    arcsec = val / COUNTS_PER_ARCSEC
+    return val, deg, arcsec
 
-def stop_all():
-    """Stoppt beide Achsen."""
-    set_speed("ra", 0)
-    set_speed("dec", 0)
-
-def repl_loop():
-    """Einfache Eingabe über USB-Konsole."""
-    print("HBX-Sim Pico bereit.")
-    print("Befehle: ra <speed>, dec <speed>, stop")
-    
-    uart.write(b"Test123\r\n")
-
+def loop(speed_ra="0", speed_dec="0"):
     while True:
-        try:
-            cmd = input(">> ").strip().split()
-            if not cmd:
-                continue
+        t0 = utime.ticks_ms()
 
-            if cmd[0] == "stop":
-                stop_all()
-            elif cmd[0] in ("ra", "dec") and len(cmd) == 2:
-                axis = cmd[0]
-                try:
-                    speed = int(cmd[1])
-                    set_speed(axis, speed)
-                except ValueError:
-                    print("Ungültige Geschwindigkeit:", cmd[1])
-            elif cmd[0] == "q":
-                stop_all()
-                print("Beendet mit q.")
-                break
-            else:
-                print("Unbekannter Befehl:", " ".join(cmd))
-        except KeyboardInterrupt:
-            stop_all()
-            print("Beendet.")
-            break
+        # 1. Status RA
+        send_frame(bytes([0x55, 0xAA, 0x01, 0x01, 0x04]))
+        resp_ra = read_response()
+        pos_ra = parse_position(resp_ra)
+        if pos_ra:
+            val, deg, arcsec = pos_ra
+            print(f"RA raw={val}  deg={deg:.6f}°  arcsec={arcsec:.1f}\"")
+        else:
+            print("RA-Status unvollständig:", resp_ra)
 
-# Hauptprogramm starten
-if __name__ == "__main__":
-    repl_loop()
+        utime.sleep_ms(25)
+
+        # 2. Status DEC
+        send_frame(bytes([0x55, 0xAA, 0x01, 0x01, 0x24]))
+        resp_dec = read_response()
+        pos_dec = parse_position(resp_dec)
+        if pos_dec:
+            val, deg, arcsec = pos_dec
+            print(f"DEC raw={val}  deg={deg:.6f}°  arcsec={arcsec:.1f}\"")
+        else:
+            print("DEC-Status unvollständig:", resp_dec)
+
+        utime.sleep_ms(35)
+
+        # 3. Slew
+        send_frame(CMD_RA[speed_ra])
+        send_frame(CMD_DEC[speed_dec])
+        print("Slew:", speed_ra, speed_dec)
+
+        # Rest bis 300 ms
+        elapsed = utime.ticks_diff(utime.ticks_ms(), t0)
+        if elapsed < 300:
+            utime.sleep_ms(300 - elapsed)
