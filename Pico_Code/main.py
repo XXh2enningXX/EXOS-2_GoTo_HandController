@@ -90,9 +90,17 @@ def send_slew(timer):
     print("Slew:", speed_ra, speed_dec)
 
 # ---------- Joystick / Tracking ----------
+def cal_mid(samples=64):
+    s = 0
+    for _ in range(samples):
+        s += adc.read_u16()
+        utime.sleep_us(SERIES_DELAY_US)
+    return s//samples
+
+mid = cal_mid()
+
 def adc_to_speed(v, dead=DEADZONE):
     """ADC 0..65535 -> nichtlineare Stufen -9..+9"""
-    mid = 32768
     delta = v - mid
     if abs(delta) <= dead:
         return '0'
@@ -103,15 +111,21 @@ def adc_to_speed(v, dead=DEADZONE):
     def map_zone(x):
         ax = abs(x)
         if ax < 0.2:  return 1
-        if ax < 0.4:  return 2
-        if ax < 0.6:  return 4
-        if ax < 0.8:  return 8
+        if ax < 0.32:  return 2
+        if ax < 0.41:  return 3
+        if ax < 0.49:  return 4
+        if ax < 0.56:  return 5
+        if ax < 0.62:  return 6
+        if ax < 0.67:  return 7
+        if ax < 0.71:  return 8
         return 9
 
     s = map_zone(norm)
     if norm < 0:
         s = -s
     return str(s)
+
+
 def compute_effective_speeds(js_rx, js_ry):
     """
     Joystick überschreibt Tracking. Wenn Joystick 'losgelassen' (0),
