@@ -33,7 +33,7 @@ def make_frame(axis: str, speed: int) -> bytes:
     if axis == "ra":
         axis_code = "01"
     elif axis == "dec":
-        axis_code = "21"
+        axis_code = "24"
     else:
         raise ValueError("Ungültige Achse (nur 'ra' oder 'dec')")
 
